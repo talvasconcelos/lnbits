@@ -34,15 +34,16 @@ class Track(NamedTuple):
         return max(50_000_000, self.price_msat * 5)
 
     async def fullname(self) -> str:
-        from .crud import get_producer
+        # from .crud import get_producer
 
-        producer = await get_producer(self.producer)
-        if producer:
-            producer_name = producer.name
-        else:
-            producer_name = "unknown author"
+        # producer = await get_producer(self.producer)
+        # if producer:
+        #     producer_name = producer.name
+        # else:
+        #     producer_name = "unknown author"
 
-        return f"'{self.name}', from {producer_name}."
+        # return f"'{self.name}', from {producer_name}."
+        return self.name
 
     async def lnurlpay_metadata(self) -> LnurlPayMetadata:
         description = (
