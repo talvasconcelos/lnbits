@@ -43,15 +43,25 @@ class Track(NamedTuple):
         #     producer_name = "unknown author"
 
         # return f"'{self.name}', from {producer_name}."
+        if not self.name.endswith('.'):
+            return self.name + '.'
         return self.name
 
     async def lnurlpay_metadata(self) -> LnurlPayMetadata:
+        from .crud import get_livestream_by_track
+
         description = (
             await self.fullname()
-        ) + " Like this track? Send some sats in appreciation."
+        ) + " \n\nLike this track? Send some sats in appreciation."
 
         if self.download_url:
-            description += f" Send {round(self.price_msat/1000)} sats or more and you can download it."
+            description += f" \n\nSend {round(self.price_msat/1000)} sats or more to download at 320kbps."
+        else:
+            ls = await get_livestream_by_track(self.id)
+            if ls.fee_pct > 0:
+                description += f" \n\n{ls.fee_pct}% will automatically go to the DJ and {100 - ls.fee_pct}% to the music producer."
+            else:
+                description += f" \n\nEverything you send will go to the music producer."
 
         return LnurlPayMetadata(json.dumps([["text/plain", description]]))
 
