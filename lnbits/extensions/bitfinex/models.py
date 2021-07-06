@@ -1,11 +1,13 @@
-# from sqlite3 import Row
-# from typing import NamedTuple
+from typing import NamedTuple
 
 
-# class Example(NamedTuple):
-#    id: str
-#    wallet: str
-#
-#    @classmethod
-#    def from_row(cls, row: Row) -> "Example":
-#        return cls(**dict(row))
+class Connections(NamedTuple):
+    id: str
+    wallet: str
+    currency: str
+    bfx_key: str
+    bfx_secret: str
+
+    @classmethod
+    def from_row(cls, row: Row) -> "Connections":
+        return cls(**dict(row))

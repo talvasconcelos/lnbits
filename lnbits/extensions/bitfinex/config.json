@@ -1,6 +1,6 @@
 {
-    "name": "Build your own!",
-    "short_description": "Join us, make an extension",
-    "icon": "info",
-    "contributors": ["github_username"]
+  "name": "Bitfinex",
+  "short_description": "A Bitfinex off-ramp",
+  "icon": "logout",
+  "contributors": ["talvasconcelos"]
 }

@@ -1,0 +1,268 @@
+{% extends "base.html" %} {% from "macros.jinja" import window_vars with context
+%} {% block page %}
+<div class="row q-col-gutter-md">
+  <div class="col-12 col-md-7 q-gutter-y-md">
+    <q-card>
+      <q-card-section>
+        <q-btn unelevated color="primary" @click="openConnectDialog()"
+          >Connect to Bitfinex</q-btn
+        >
+      </q-card-section>
+    </q-card>
+
+    <q-card v-if="true">
+      <q-card-section>
+        <div class="row items-center no-wrap q-mb-md">
+          <div class="col">
+            <h5 class="text-subtitle1 q-my-none">Exchange Connection</h5>
+          </div>
+        </div>
+        <!-- <q-table
+          dense
+          flat
+          :data="connections"
+          row-key="id"
+          :columns="connectionsTable.columns"
+          :pagination.sync="connectionsTable.pagination"
+        >
+          {% raw %}
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th auto-width></q-th>
+              <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                {{ col.label }}
+              </q-th>
+              <q-th auto-width></q-th>
+            </q-tr>
+          </template>
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td auto-width>
+                <q-btn
+                  unelevated
+                  dense
+                  size="xs"
+                  icon="link"
+                  :color="($q.dark.isActive) ? 'grey-7' : 'grey-5'"
+                  type="a"
+                  :href="props.row.displayUrl"
+                  target="_blank"
+                ></q-btn>
+              </q-td>
+              <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                {{ col.value }}
+              </q-td>
+              <q-td auto-width>
+                <q-btn
+                  flat
+                  dense
+                  size="xs"
+                  @click="updateformDialog(props.row.id)"
+                  icon="edit"
+                  color="light-blue"
+                ></q-btn>
+              </q-td>
+              <q-td auto-width>
+                <q-btn
+                  flat
+                  dense
+                  size="xs"
+                  @click="deleteForm(props.row.id)"
+                  icon="cancel"
+                  color="pink"
+                ></q-btn>
+              </q-td>
+            </q-tr>
+          </template>
+          {% endraw %}
+        </q-table> -->
+      </q-card-section>
+    </q-card>
+    <q-dialog v-model="connectDialog.show" position="top">
+      <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card">
+        <q-form @submit="submitConnectData" class="q-gutter-md">
+          <q-select
+            filled
+            dense
+            emit-value
+            v-model="connectDialog.data.wallet"
+            :options="g.user.walletOptions"
+            label="Wallet *"
+          >
+          </q-select>
+          <q-input
+            filled
+            dense
+            v-model.trim="connectDialog.data.name"
+            type="name"
+            label="Name the connection"
+          ></q-input>
+          <q-input
+            filled
+            dense
+            v-model.trim="connectDialog.data.key"
+            type="text"
+            label="Bitfinex API Key"
+          ></q-input>
+          <q-input
+            filled
+            dense
+            v-model.trim="connectDialog.data.secret"
+            type="text"
+            label="Bitfinex API Secret"
+          ></q-input>
+          <div class="row q-mt-lg">
+            <q-btn
+              v-if="connectDialog.data.id"
+              unelevated
+              color="primary"
+              type="submit"
+              >Update Connection</q-btn
+            >
+            <q-btn
+              v-else
+              unelevated
+              color="primary"
+              :disable="connectDialog.data.key == null || connectDialog.data.secret == null || connectDialog.data.name == null"
+              type="submit"
+              >Connect</q-btn
+            >
+            <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+              >Cancel</q-btn
+            >
+          </div>
+        </q-form>
+      </q-card>
+    </q-dialog>
+  </div>
+
+  <div class="col-12 col-md-5 q-gutter-y-md">
+    <q-card>
+      <q-card-section>
+        <h6 class="text-subtitle1 q-my-none">LNbits jukebox extension</h6>
+      </q-card-section>
+      <q-card-section class="q-pa-none">
+        <q-separator></q-separator>
+        <q-list> {% include "bitfinex/_api_docs.html" %} </q-list>
+      </q-card-section>
+    </q-card>
+  </div>
+</div>
+<q-card>
+  <q-card-section>
+    <h5 class="text-subtitle1 q-mt-none q-mb-md">Frameworks used by LNbits</h5>
+    <q-list>
+      <q-item
+        v-for="tool in tools"
+        :key="tool.name"
+        tag="a"
+        :href="tool.url"
+        target="_blank"
+      >
+        {% raw %}
+        <!-- with raw Flask won't try to interpret the Vue moustaches -->
+        <q-item-section>
+          <q-item-label>{{ tool.name }}</q-item-label>
+          <q-item-label caption>{{ tool.language }}</q-item-label>
+        </q-item-section>
+        {% endraw %}
+      </q-item>
+    </q-list>
+    <q-separator class="q-my-lg"></q-separator>
+    <p>
+      A magical "g" is always available, with info about the user, wallets and
+      extensions:
+    </p>
+    <code class="text-caption">{% raw %}{{ g }}{% endraw %}</code>
+  </q-card-section>
+</q-card>
+{% endblock %} {% block scripts %} {{ window_vars(user) }}
+<script>
+  new Vue({
+    el: '#vue',
+    mixins: [windowMixin],
+    data: function () {
+      return {
+        connections: [],
+        operations: [],
+        connectDialog: {
+          show: false,
+          data: {}
+        },
+        operationDialog: {
+          show: false,
+          data: {}
+        },
+        connectionsTable: {
+          columns: [
+            {name: 'name', align: 'left', label: 'Name', field: 'name'},
+            {name: 'id', align: 'left', label: 'ID', field: 'id'},
+            {name: 'wallet', align: 'left', label: 'Wallet', field: 'wallet'},
+            {name: 'key', align: 'left', label: 'Key', field: 'key'},
+            {name: 'secret', align: 'left', label: 'Secret', field: 'secret'}
+          ],
+          pagination: {
+            rowsPerPage: 10
+          }
+        },
+        operationsTable: {
+          columns: [
+            {name: 'type', align: 'left', label: 'Type', field: 'type'},
+            {name: 'id', align: 'left', label: 'ID', field: 'id'},
+            {name: 'amount', align: 'left', label: 'Amount', field: 'amount'}
+          ],
+          pagination: {
+            rowsPerPage: 10
+          }
+        }
+      }
+    },
+    methods: {
+      openConnectDialog() {
+        this.connectDialog.show = true
+        this.connectDialog.data = {}
+      },
+      submitConnectData() {
+        const wallet = _.findWhere(this.g.user.wallets, {
+          id: this.connectDialog.data.wallet
+        })
+        this.connectDialog.data.inkey = wallet.inkey
+        const data = this.connectDialog.data
+
+        if (data.id) {
+          this.updateConnection(wallet, data)
+        } else {
+          this.createConnection(wallet, data)
+        }
+      },
+      createConnection(wallet, data) {
+        console.log('create', data)
+        LNbits.api
+          .request('POST', '/bitfinex/api/v1/connection', wallet.inkey, data)
+          .then(response => {
+            this.connections.push(response.data)
+            this.connectDialog.show = false
+            this.connectDialog.data = {}
+          })
+          .catch(error => {
+            LNbits.utils.notifyApiError(error)
+          })
+      }
+    },
+    created: function () {
+      var self = this
+
+      // axios is available for making requests
+      axios({
+        method: 'GET',
+        url: '/bitfinex/api/v1/tools',
+        headers: {
+          'X-bitfinex-header': 'not-used'
+        }
+      }).then(function (response) {
+        self.tools = response.data
+      })
+    }
+  })
+</script>
+{% endblock %}
