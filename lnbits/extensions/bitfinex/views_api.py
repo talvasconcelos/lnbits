@@ -16,7 +16,8 @@ from . import bitfinex_ext
 # add your endpoints here
 
 
-@bitfinex_ext.route("/api/v1/tools", methods=["GET"])
+@bitfinex_ext.route("/api/v1/connect", methods=["POST"])
+@bitfinex_ext.route("/api/v1/connect/<conn_id>", methods=["PUT"])
 async def api_bitfinex():
     """Try to add descriptions for others."""
     tools = [
