@@ -386,6 +386,19 @@ window.windowMixin = {
   }
 }
 
+window.createHmac384 = async (secret, body) => {
+  let enc = new TextEncoder('utf-8')
+  let algorithm = { name: "HMAC", hash: {name: "SHA-384"} }
+
+  let key = await crypto.subtle.importKey("raw", enc.encode(secret), algorithm, false, ["sign", "verify"])
+  let signature = await crypto.subtle.sign(algorithm.name, key, enc.encode(body))
+  let digest = [...new Uint8Array(signature)]
+    .map (b => b.toString(16).padStart (2, "0"))
+    .join ("")
+
+  return digest
+}
+
 window.decryptLnurlPayAES = function (success_action, preimage) {
   let keyb = new Uint8Array(
     preimage.match(/[\da-f]{2}/gi).map(h => parseInt(h, 16))

@@ -10,14 +10,14 @@
       </q-card-section>
     </q-card>
 
-    <q-card v-if="true">
+    <q-card>
       <q-card-section>
         <div class="row items-center no-wrap q-mb-md">
           <div class="col">
-            <h5 class="text-subtitle1 q-my-none">Exchange Connection</h5>
+            <h5 class="text-subtitle1 q-my-none">Exchange Connections</h5>
           </div>
         </div>
-        <!-- <q-table
+        <q-table
           dense
           flat
           :data="connections"
@@ -75,7 +75,7 @@
             </q-tr>
           </template>
           {% endraw %}
-        </q-table> -->
+        </q-table>
       </q-card-section>
     </q-card>
     <q-dialog v-model="connectDialog.show" position="top">
@@ -148,34 +148,7 @@
     </q-card>
   </div>
 </div>
-<q-card>
-  <q-card-section>
-    <h5 class="text-subtitle1 q-mt-none q-mb-md">Frameworks used by LNbits</h5>
-    <q-list>
-      <q-item
-        v-for="tool in tools"
-        :key="tool.name"
-        tag="a"
-        :href="tool.url"
-        target="_blank"
-      >
-        {% raw %}
-        <!-- with raw Flask won't try to interpret the Vue moustaches -->
-        <q-item-section>
-          <q-item-label>{{ tool.name }}</q-item-label>
-          <q-item-label caption>{{ tool.language }}</q-item-label>
-        </q-item-section>
-        {% endraw %}
-      </q-item>
-    </q-list>
-    <q-separator class="q-my-lg"></q-separator>
-    <p>
-      A magical "g" is always available, with info about the user, wallets and
-      extensions:
-    </p>
-    <code class="text-caption">{% raw %}{{ g }}{% endraw %}</code>
-  </q-card-section>
-</q-card>
+
 {% endblock %} {% block scripts %} {{ window_vars(user) }}
 <script>
   new Vue({
@@ -226,8 +199,8 @@
         const wallet = _.findWhere(this.g.user.wallets, {
           id: this.connectDialog.data.wallet
         })
-        this.connectDialog.data.inkey = wallet.inkey
         const data = this.connectDialog.data
+        data.user = this.g.user.id
 
         if (data.id) {
           this.updateConnection(wallet, data)
@@ -238,7 +211,7 @@
       createConnection(wallet, data) {
         console.log('create', data)
         LNbits.api
-          .request('POST', '/bitfinex/api/v1/connection', wallet.inkey, data)
+          .request('POST', '/bitfinex/api/v1/bitfinex/connection', wallet.adminkey, data)
           .then(response => {
             this.connections.push(response.data)
             this.connectDialog.show = false
@@ -247,21 +220,27 @@
           .catch(error => {
             LNbits.utils.notifyApiError(error)
           })
-      }
+      },
+      getConns() {
+        LNbits.api.request(
+          'GET',
+          '/bitfinex/api/v1/bitfinex',
+          this.g.user.wallets[0].inkey
+        ).then(res => {
+            this.connections = res.data
+            console.log(this.connections)
+        }).catch(err => {
+          LNbits.utils.notifyApiError(err)
+        })
+      },
     },
     created: function () {
-      var self = this
+      this.getConns()
+      //let hash = window.createHmac384().then(console.log)
 
-      // axios is available for making requests
-      axios({
-        method: 'GET',
-        url: '/bitfinex/api/v1/tools',
-        headers: {
-          'X-bitfinex-header': 'not-used'
-        }
-      }).then(function (response) {
-        self.tools = response.data
-      })
+    },
+    mounted: function () {
+      
     }
   })
 </script>
