@@ -12,7 +12,7 @@ async def add_bfx_conn(
 ) -> Optional[Connection]:
     result = await db.execute(
         """
-        INSERT INTO bitfinex.connections (name, user, wallet, bfx_key, bfx_secret)
+        INSERT INTO bitfinex.connections (name, userd, wallet, bfx_key, bfx_secret)
         VALUES (?, ?, ?, ?, ?)
         """,
         (name, user, wallet, bfx_key, bfx_secret),
@@ -31,7 +31,7 @@ async def update_bfx_conn(
         """
         UPDATE bitfinex.connections SET
           name = ?,
-          user = ?,
+          userd = ?,
           wallet = ?,
           bfx_key = ?,
           bfx_secret = ?,
@@ -49,14 +49,15 @@ async def get_bfx_conn(id: int) -> Optional[Connection]:
     return Connection(**dict(row)) if row else None
 
 async def get_bfx_conns_by_user(user: str) -> List[Connection]:
-    rows = await db.fetchall("SELECT * FROM bitfinex.connections WHERE user = ?", (user,))
+    rows = await db.fetchall("SELECT * FROM bitfinex.connections WHERE userd = ?", (user,))
+    
     return [Connection(**dict(row)) for row in rows]
 
 
 async def delete_bfx_conn(user: str, conn_id: int):
     await db.execute(
         """
-        DELETE FROM bitfinex.connections WHERE user = ? AND id = ?
+        DELETE FROM bitfinex.connections WHERE userd = ? AND id = ?
         """,
         (user, conn_id),
     )

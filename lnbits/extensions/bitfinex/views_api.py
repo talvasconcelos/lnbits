@@ -19,6 +19,7 @@ from . import bitfinex_ext
 @api_check_wallet_key("invoice")
 async def api_conns_from_user():
     conns = await get_bfx_conns_by_user(g.wallet.user)
+    print("CONNS", conns)
     try:
         return (
             jsonify([{**conn._asdict()} for conn in conns]),
@@ -42,19 +43,18 @@ async def api_conns_from_user():
 async def api_add_or_update_conn(conn_id=None):
     if conn_id == None:
         await add_bfx_conn(
-            g.data["name"],
-            g.data["user"],
-            g.data["wallet"],
-            g.data["key"],
-            g.data["secret"]
+            user=g.data["user"],
+            name=g.data["name"],
+            wallet=g.data["wallet"],
+            bfx_key=g.data["key"],
+            bfx_secret=g.data["secret"]
         )
         return "", HTTPStatus.CREATED
     else:
         await update_bfx_conn(
-            g.data["conn_id"],
-            g.data["name"],
-            g.data["key"],
-            g.data["secret"]
+            id=g.data["conn_id"],
+            name=g.data["name"],
+            bfx_key=g.data["key"],
+            bfx_secret=g.data["secret"]
         )
         return "", HTTPStatus.OK
-    

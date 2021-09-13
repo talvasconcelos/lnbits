@@ -3,7 +3,7 @@ async def m001_initial(db):
        f"""
        CREATE TABLE bitfinex.connections (
            id {db.serial_primary_key},
-           "user" TEXT NOT NULL,
+           userd TEXT NOT NULL,
            name TEXT NOT NULL,
            wallet TEXT NOT NULL,
            bfx_key TEXT NOT NULL,
