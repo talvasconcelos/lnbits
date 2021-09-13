@@ -4,7 +4,7 @@ from lnbits.decorators import check_user_exists, validate_uuids
 
 from pyngrok import conf, ngrok
 from . import ngrok_ext
-
+from os import getenv
 
 def log_event_callback(log):
     string = str(log)
@@ -18,7 +18,12 @@ def log_event_callback(log):
 
 conf.get_default().log_event_callback = log_event_callback
 
-ngrok_tunnel = ngrok.connect(5000)
+ngrok_authtoken = getenv("NGROK_AUTHTOKEN")
+if ngrok_authtoken is not None:
+    ngrok.set_auth_token(ngrok_authtoken)
+
+port = getenv("PORT")
+ngrok_tunnel = ngrok.connect(port)
 
 
 @ngrok_ext.route("/")

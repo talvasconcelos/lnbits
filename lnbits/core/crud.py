@@ -113,6 +113,19 @@ async def create_wallet(
     return new_wallet
 
 
+async def update_wallet(
+    wallet_id: str, new_name: str, conn: Optional[Connection] = None
+) -> Optional[Wallet]:
+    await (conn or db).execute(
+        """
+        UPDATE wallets SET
+            name = ?
+        WHERE id = ?
+        """,
+        (new_name, wallet_id),
+    )
+
+
 async def delete_wallet(
     *, user_id: str, wallet_id: str, conn: Optional[Connection] = None
 ) -> None:
@@ -208,6 +221,7 @@ async def get_payments(
     outgoing: bool = False,
     incoming: bool = False,
     since: Optional[int] = None,
+    memo: Optional[str] = None,
     exclude_uncheckable: bool = False,
     conn: Optional[Connection] = None,
 ) -> List[Payment]:
@@ -230,6 +244,10 @@ async def get_payments(
     if wallet_id:
         clause.append("wallet = ?")
         args.append(wallet_id)
+
+    if memo:
+        clause.append(f"memo == ?")
+        args.append(memo)
 
     if complete and pending:
         pass
@@ -390,7 +408,7 @@ async def check_internal(
     row = await (conn or db).fetchone(
         """
         SELECT checking_id FROM apipayments
-        WHERE hash = ? AND pending AND amount > 0 
+        WHERE hash = ? AND pending AND amount > 0
         """,
         (payment_hash,),
     )
