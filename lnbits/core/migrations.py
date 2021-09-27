@@ -188,3 +188,7 @@ async def m005_balance_check_balance_notify(db):
         );
     """
     )
+
+async def m006_add_account_username(db):
+    await db.execute("ALTER TABLE accounts ADD COLUMN alias TEXT UNIQUE")
+    await db.execute("CREATE INDEX idx_alias ON accounts (id, alias)")

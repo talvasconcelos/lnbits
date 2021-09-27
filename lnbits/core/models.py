@@ -16,6 +16,7 @@ class User(NamedTuple):
     extensions: List[str] = []
     wallets: List["Wallet"] = []
     password: Optional[str] = None
+    alias: Optional[str] = None
 
     @property
     def wallet_ids(self) -> List[str]:

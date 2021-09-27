@@ -90,7 +90,7 @@ async def wallet():
 
         if LNBITS_ALLOWED_USERS and user_id not in LNBITS_ALLOWED_USERS:
             abort(HTTPStatus.UNAUTHORIZED, "User not authorized.")
-
+        print("USER", user)
     if not wallet_id:
         if user.wallets and not wallet_name:
             wallet = user.wallets[0]

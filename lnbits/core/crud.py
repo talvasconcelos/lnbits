@@ -38,7 +38,7 @@ async def get_account(
 
 async def get_user(user_id: str, conn: Optional[Connection] = None) -> Optional[User]:
     user = await (conn or db).fetchone(
-        "SELECT id, email FROM accounts WHERE id = ?", (user_id,)
+        "SELECT id, alias, email FROM accounts WHERE id = ?", (user_id,)
     )
 
     if user:
