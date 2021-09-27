@@ -15,6 +15,16 @@ Vue.component('lnbits-fsat', {
   }
 })
 
+Vue.component('lnbits-user-alias', {
+  data: function () {
+    return {
+      user: null,
+      showForm: false
+    }
+  },
+  template: ``
+})
+
 Vue.component('lnbits-wallet-list', {
   data: function () {
     return {
