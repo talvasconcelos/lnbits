@@ -1,14 +1,15 @@
 import asyncio
 import json
-import httpx
 from os import getenv
-from typing import Optional, Dict, AsyncGenerator
+from typing import AsyncGenerator, Dict, Optional
+
+import httpx
 
 from .base import (
-    StatusResponse,
     InvoiceResponse,
     PaymentResponse,
     PaymentStatus,
+    StatusResponse,
     Wallet,
 )
 
@@ -95,6 +96,7 @@ class LNbitsWallet(Wallet):
         else:
             data = r.json()
             checking_id = data["checking_id"]
+            fee_msat = data["fee_msat"] if hasattr(data, "fee_msat") else 0
 
         return PaymentResponse(ok, checking_id, fee_msat, error_message)
 

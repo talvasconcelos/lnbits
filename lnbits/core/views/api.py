@@ -24,8 +24,9 @@ from lnbits.decorators import (
     WalletTypeInfo,
     get_key_type,
 )
-from lnbits.helpers import url_for
+from lnbits.helpers import url_for, urlsafe_short_hash
 from lnbits.requestvars import g
+from lnbits.settings import LNBITS_ADMIN_USERS
 from lnbits.utils.exchange_rates import (
     currencies,
     fiat_amount_as_satoshis,
@@ -34,13 +35,13 @@ from lnbits.utils.exchange_rates import (
 
 from .. import core_app, db
 from ..crud import (
+    create_payment,
     get_payments,
     get_standalone_payment,
-    save_balance_check,
-    update_wallet,
-    create_payment,
     get_wallet,
+    save_balance_check,
     update_payment_status,
+    update_wallet,
 )
 from ..services import (
     InvoiceFailure,
@@ -51,8 +52,6 @@ from ..services import (
     perform_lnurlauth,
 )
 from ..tasks import api_invoice_listeners
-from lnbits.settings import LNBITS_ADMIN_USERS
-from lnbits.helpers import urlsafe_short_hash
 
 
 @core_app.get("/api/v1/wallet")
@@ -206,7 +205,7 @@ async def api_payments_create_invoice(data: CreateInvoiceData, wallet: Wallet):
 
 async def api_payments_pay_invoice(bolt11: str, wallet: Wallet):
     try:
-        payment_hash = await pay_invoice(wallet_id=wallet.id, payment_request=bolt11)
+        payment_hash, fee_msat = await pay_invoice(wallet_id=wallet.id, payment_request=bolt11)
     except ValueError as e:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
     except PermissionError as e:
@@ -215,11 +214,12 @@ async def api_payments_pay_invoice(bolt11: str, wallet: Wallet):
         raise HTTPException(status_code=520, detail=str(e))
     except Exception as exc:
         raise exc
-
+    
     return {
         "payment_hash": payment_hash,
         # maintain backwards compatibility with API clients:
         "checking_id": payment_hash,
+        "fee_msat": fee_msat
     }
 
 

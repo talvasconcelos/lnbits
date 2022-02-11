@@ -88,6 +88,7 @@ async def pay_invoice(
     async with (db.reuse_conn(conn) if conn else db.connect()) as conn:
         temp_id = f"temp_{urlsafe_short_hash()}"
         internal_id = f"internal_{urlsafe_short_hash()}"
+        _fee = 0
 
         invoice = bolt11.decode(payment_request)
         if invoice.amount_msat == 0:
@@ -117,7 +118,6 @@ async def pay_invoice(
             memo=description or invoice.description or "",
             extra=extra,
         )
-
         # check_internal() returns the checking_id of the invoice we're waiting for
         internal_checking_id = await check_internal(invoice.payment_hash, conn=conn)
         if internal_checking_id:
@@ -138,7 +138,6 @@ async def pay_invoice(
                 conn=conn,
                 **payment_kwargs,
             )
-
         # do the balance check if internal payment
         if internal_checking_id:
             wallet = await get_wallet(wallet_id, conn=conn)
@@ -173,6 +172,7 @@ async def pay_invoice(
         # actually pay the external invoice
         payment: PaymentResponse = await WALLET.pay_invoice(payment_request)
         if payment.checking_id:
+            _fee = payment.fee_msat
             async with db.connect() as conn:
                 await create_payment(
                     checking_id=payment.checking_id,
@@ -191,7 +191,7 @@ async def pay_invoice(
                 or "Payment failed, but backend didn't give us an error message."
             )
 
-    return invoice.payment_hash
+    return invoice.payment_hash, _fee
 
 
 async def redeem_lnurl_withdraw(
