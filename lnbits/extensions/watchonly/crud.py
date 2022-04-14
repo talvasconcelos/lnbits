@@ -1,8 +1,9 @@
 from typing import List, Optional
 
+import httpx  # type: ignore
 from embit.descriptor import Descriptor, Key  # type: ignore
 from embit.descriptor.arguments import AllowedDerivation  # type: ignore
-from embit.networks import NETWORKS  # type: ignore
+from embit.networks import NETWORKS
 
 from lnbits.helpers import urlsafe_short_hash
 
@@ -141,7 +142,18 @@ async def get_fresh_address(wallet_id: str) -> Optional[Addresses]:
     if not wallet:
         return None
 
+    mempool = await get_mempool(wallet.user)
     address = await get_derive_address(wallet_id, wallet.address_no + 1)
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(
+                mempool.endpoint + "/api/address/" + address
+            )
+            respAmount = r.json()["chain_stats"]["funded_txo_sum"]
+            if respAmount > 0:
+                await get_fresh_address(wallet_id)
+    except Exception:
+        pass
 
     await update_watch_wallet(wallet_id=wallet_id, address_no=wallet.address_no + 1)
     masterpub_id = urlsafe_short_hash()
