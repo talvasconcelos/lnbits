@@ -126,6 +126,15 @@ async def wallet(
         else:
             wallet = await create_wallet(user_id=user.id, wallet_name=wallet_name)
 
+        # Allow for API creation of user/wallet account, request must have header: `Accept: application/json` 
+        accept = request.headers["accept"]
+        if accept == "application/json":
+            data = {
+                "user": user.dict(),
+                "wallet": wallet.dict()
+            }
+            return JSONResponse(content=data)
+            
         return RedirectResponse(
             f"/wallet?usr={user.id}&wal={wallet.id}",
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
