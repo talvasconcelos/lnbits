@@ -283,6 +283,20 @@
           dialog.dismissMsg()
         }, 3000)
       },
+      nfcWrite: function (client = false, invoice) {
+        if (client) {
+          client
+            .write(invoice)
+            .then(() => {
+              console.log('Invoice sent')
+            })
+            .catch(error => {
+              console.log(`Write failed :-( try again: ${error}.`)
+            })
+        } else {
+          console.log('Pay me:', invoice)
+        }
+      },
       showInvoice: function () {
         var self = this
         var dialog = this.invoiceDialog
@@ -296,13 +310,18 @@
           .then(function (response) {
             dialog.data = response.data
             dialog.show = true
+            let ndef = false
+            if ('NDEFReader' in window) {
+              ndef = new NDEFReader()
+              self.nfcWrite(ndef, dialog.data.payment_request)
+            }
 
             dialog.dismissMsg = self.$q.notify({
               timeout: 0,
               message: 'Waiting for payment...'
             })
-
             dialog.paymentChecker = setInterval(function () {
+              Promise.resolve(self.nfcWrite(ndef, dialog.data.payment_request))
               axios
                 .get(
                   '/tpos/api/v1/tposs/' +
