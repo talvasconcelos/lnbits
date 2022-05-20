@@ -286,7 +286,9 @@
       nfcWrite: function (client = false, invoice) {
         if (client) {
           client
-            .write(invoice)
+            .write({
+              records: [{recordType: 'url', data: `lightning:${invoice}`}]
+            })
             .then(() => {
               console.log('Invoice sent')
             })
