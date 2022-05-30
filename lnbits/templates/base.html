@@ -33,11 +33,28 @@
           ></q-btn>
           {% endblock %}
           <q-toolbar-title>
+            {% block toolbar_title %} {%if SITE_TITLE == 'TPoS' %} {% else %}
             <q-btn flat no-caps dense size="lg" type="a" href="/">
+<<<<<<< Updated upstream
               {% block toolbar_title %} {% if SITE_TITLE != 'LNbits' %} {{
               SITE_TITLE }} {% else %} <strong>LN</strong>bits {% endif %} {%
               endblock %}</q-btn
             >
+=======
+<<<<<<< Updated upstream
+              {% block toolbar_title %} {% if USE_CUSTOM_LOGO %}
+              <img height="30px" alt="Logo" src="{{ USE_CUSTOM_LOGO }}" />
+              {%else%} {% if SITE_TITLE != 'LNbits' %} {{ SITE_TITLE }} {% else
+              %}
+              <strong>LN</strong>bits {% endif %} {%endif%} {% endblock %}
+            </q-btn>
+=======
+              {% if SITE_TITLE != 'LNbits' %} {{ SITE_TITLE }} {% else %}
+              <strong>LN</strong>bits {% endif %}
+            </q-btn>
+            {% endif %} {%endblock %}
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
           </q-toolbar-title>
           {% block beta %}
           <q-badge color="yellow" text-color="black" class="q-mr-md">
