@@ -3,11 +3,13 @@ import importlib
 import sys
 import traceback
 import warnings
+from http import HTTPStatus
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 import lnbits.settings
@@ -48,10 +50,7 @@ def create_app(config_object="lnbits.settings") -> FastAPI:
     origins = ["*"]
 
     app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"]
     )
 
     g().config = lnbits.settings
@@ -61,15 +60,19 @@ def create_app(config_object="lnbits.settings") -> FastAPI:
     async def validation_exception_handler(
         request: Request, exc: RequestValidationError
     ):
-        return template_renderer().TemplateResponse(
-            "error.html",
-            {"request": request, "err": f"`{exc.errors()}` is not a valid UUID."},
-        )
+        # Only the browser sends "text/html" request
+        # not fail proof, but everything else get's a JSON response
 
-        # return HTMLResponse(
-        #     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        #     content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
-        # )
+        if "text/html" in request.headers["accept"]:
+            return template_renderer().TemplateResponse(
+                "error.html",
+                {"request": request, "err": f"{exc.errors()} is not a valid UUID."},
+            )
+
+        return JSONResponse(
+            status_code=HTTPStatus.NO_CONTENT,
+            content={"detail": exc.errors()},
+        )
 
     app.add_middleware(GZipMiddleware, minimum_size=1000)
     # app.add_middleware(ASGIProxyFix)
@@ -87,18 +90,19 @@ def create_app(config_object="lnbits.settings") -> FastAPI:
 def check_funding_source(app: FastAPI) -> None:
     @app.on_event("startup")
     async def check_wallet_status():
-        error_message, balance = await WALLET.status()
-        if error_message:
+        while True:
+            error_message, balance = await WALLET.status()
+            if not error_message:
+                break
             warnings.warn(
                 f"  × The backend for {WALLET.__class__.__name__} isn't working properly: '{error_message}'",
                 RuntimeWarning,
             )
-
-            sys.exit(4)
-        else:
-            print(
-                f"  ✔️ {WALLET.__class__.__name__} seems to be connected and with a balance of {balance} msat."
-            )
+            print("Retrying connection to backend in 5 seconds...")
+            await asyncio.sleep(5)
+        print(
+            f"  ✔️ {WALLET.__class__.__name__} seems to be connected and with a balance of {balance} msat."
+        )
 
 
 def register_routes(app: FastAPI) -> None:
@@ -170,9 +174,17 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(Exception)
     async def basic_error(request: Request, err):
         print("handled error", traceback.format_exc())
+        print("ERROR:", err)
         etype, _, tb = sys.exc_info()
         traceback.print_exception(etype, err, tb)
         exc = traceback.format_exc()
-        return template_renderer().TemplateResponse(
-            "error.html", {"request": request, "err": err}
+
+        if "text/html" in request.headers["accept"]:
+            return template_renderer().TemplateResponse(
+                "error.html", {"request": request, "err": err}
+            )
+
+        return JSONResponse(
+            status_code=HTTPStatus.NO_CONTENT,
+            content={"detail": err},
         )

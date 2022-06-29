@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from mmap import MAP_DENYWRITE
+
+# from mmap import MAP_DENYWRITE
 
 from fastapi.param_functions import Depends
 from fastapi.params import Query

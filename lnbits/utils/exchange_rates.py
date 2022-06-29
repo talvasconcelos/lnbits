@@ -71,6 +71,7 @@ currencies = {
     "IMP": "Isle of Man Pound",
     "INR": "Indian Rupee",
     "IQD": "Iraqi Dinar",
+    "IRT": "Iranian Toman",
     "ISK": "Icelandic Króna",
     "JEP": "Jersey Pound",
     "JMD": "Jamaican Dollar",
@@ -179,6 +180,12 @@ class Provider(NamedTuple):
 
 
 exchange_rate_providers = {
+    "exir": Provider(
+        "Exir",
+        "exir.io",
+        "https://api.exir.io/v1/ticker?symbol={from}-{to}",
+        lambda data, replacements: data["last"],
+    ),
     "bitfinex": Provider(
         "Bitfinex",
         "bitfinex.com",
@@ -284,6 +291,7 @@ async def get_fiat_rate_satoshis(currency: str) -> float:
 
 async def fiat_amount_as_satoshis(amount: float, currency: str) -> int:
     return int(amount * (await get_fiat_rate_satoshis(currency)))
+
 
 async def satoshis_amount_as_fiat(amount: float, currency: str) -> float:
     return float(amount / (await get_fiat_rate_satoshis(currency)))
