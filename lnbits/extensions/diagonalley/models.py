@@ -21,6 +21,7 @@ class Stalls(BaseModel):
     relays: str
     shippingzones: str
 
+
 class createStalls(BaseModel):
     wallet: str = Query(...)
     name: str = Query(...)
@@ -28,6 +29,7 @@ class createStalls(BaseModel):
     privatekey: str = Query(...)
     relays: str = Query(...)
     shippingzones: str = Query(...)
+
 
 class createProduct(BaseModel):
     stall: str = Query(None)
@@ -37,6 +39,7 @@ class createProduct(BaseModel):
     image: str = Query(None)
     price: int = Query(0, ge=0)
     quantity: int = Query(0, ge=0)
+
 
 class Products(BaseModel):
     id: str
@@ -48,9 +51,11 @@ class Products(BaseModel):
     price: int
     quantity: int
 
+
 class createZones(BaseModel):
     cost: str = Query(None)
     countries: str = Query(None)
+
 
 class Zones(BaseModel):
     id: str
@@ -68,6 +73,7 @@ class createOrder(BaseModel):
     address: str = Query(...)
     email: str = Query(...)
     invoiceid: str = Query(...)
+
 
 class Orders(BaseModel):
     id: str

@@ -36,9 +36,7 @@ regex = re.compile(
 ###Products
 
 
-async def create_diagonalley_product(
-    data: createProduct
-) -> Products:
+async def create_diagonalley_product(data: createProduct) -> Products:
     # returning = "" if db.type == SQLITE else "RETURNING ID"
     # method = db.execute if db.type == SQLITE else db.fetchone
     product_id = urlsafe_short_hash()
@@ -109,10 +107,7 @@ async def delete_diagonalley_product(product_id: str) -> None:
 ###zones
 
 
-async def create_diagonalley_zone(
-    wallet,
-    data: createZones
-) -> Zones:
+async def create_diagonalley_zone(wallet, data: createZones) -> Zones:
     zone_id = urlsafe_short_hash()
     await db.execute(
         f"""
@@ -193,9 +188,7 @@ async def delete_diagonalley_zone(zone_id: str) -> None:
 ###Stalls
 
 
-async def create_diagonalley_stall(
-    data: createStalls
-) -> Stalls:
+async def create_diagonalley_stall(data: createStalls) -> Stalls:
     stall_id = urlsafe_short_hash()
     await db.execute(
         f"""
@@ -217,7 +210,8 @@ async def create_diagonalley_stall(
             data.publickey,
             data.privatekey,
             data.relays,
-            data.shippingzones),
+            data.shippingzones,
+        ),
     )
 
     stall = await get_diagonalley_stall(stall_id)
@@ -314,9 +308,7 @@ async def delete_diagonalley_stall(stall_id: str) -> None:
 ###Orders
 
 
-async def create_diagonalley_order(
-    data: createOrder
-) -> Orders:
+async def create_diagonalley_order(data: createOrder) -> Orders:
 
     order_id = urlsafe_short_hash()
     await db.execute(

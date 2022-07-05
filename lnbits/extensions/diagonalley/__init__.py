@@ -18,9 +18,11 @@ diagonalley_static_files = [
 ]
 
 diagonalley_ext: APIRouter = APIRouter(
-    prefix="/diagonalley", tags=["diagonalley"]
+    prefix="/diagonalley",
+    tags=["diagonalley"]
     # "diagonalley", __name__, static_folder="static", template_folder="templates"
 )
+
 
 def diagonalley_renderer():
     return template_renderer(["lnbits/extensions/diagonalley/templates"])
@@ -34,4 +36,3 @@ from .views_api import *  # noqa
 def diagonalley_start():
     loop = asyncio.get_event_loop()
     loop.create_task(catch_everything_and_restart(wait_for_paid_invoices))
-
