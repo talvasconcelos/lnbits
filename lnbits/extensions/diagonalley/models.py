@@ -16,18 +16,18 @@ class Stalls(BaseModel):
     id: str
     wallet: str
     name: str
-    publickey: str
-    privatekey: str
-    relays: str
+    publickey: Optional[str] #nostr related
+    privatekey: Optional[str] #nostr related
+    relays: Optional[str] #nostr related
     shippingzones: str
 
 
 class createStalls(BaseModel):
     wallet: str = Query(...)
     name: str = Query(...)
-    publickey: str = Query(...)
-    privatekey: str = Query(...)
-    relays: str = Query(...)
+    publickey: str = Query(None) #nostr related
+    privatekey: str = Query(None) #nostr related
+    relays: str = Query(None) #nostr related
     shippingzones: str = Query(...)
 
 
@@ -53,13 +53,12 @@ class Products(BaseModel):
 
 
 class createZones(BaseModel):
-    cost: str = Query(None)
-    countries: str = Query(None)
+    cost: str = Query(...)
+    countries: str = Query(...)
 
 
 class Zones(BaseModel):
     id: str
-    wallet: str
     cost: str
     countries: str
 
@@ -87,3 +86,4 @@ class Orders(BaseModel):
     invoiceid: str
     paid: bool
     shipped: bool
+    time: int
