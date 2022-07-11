@@ -107,20 +107,19 @@ async def delete_diagonalley_product(product_id: str) -> None:
 ###zones
 
 
-async def create_diagonalley_zone(wallet, data: createZones) -> Zones:
+async def create_diagonalley_zone(data: createZones) -> Zones:
     zone_id = urlsafe_short_hash()
     await db.execute(
         f"""
         INSERT INTO diagonalley.zones (
             id,
-            wallet,
             cost,
             countries
 
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?)
         """,
-        (zone_id, wallet, data.cost, data.countries),
+        (zone_id, data.cost, data.countries),
     )
 
     zone = await get_diagonalley_zone(zone_id)
@@ -143,41 +142,41 @@ async def get_diagonalley_zone(zone_id: str) -> Optional[Zones]:
     return Zones(**row) if row else None
 
 
-async def get_diagonalley_zones(wallet_ids: Union[str, List[str]]) -> List[Zones]:
-    if isinstance(wallet_ids, str):
-        wallet_ids = [wallet_ids]
-        print(wallet_ids)
+async def get_diagonalley_zones(zone_ids: Union[str, List[str]]) -> List[Zones]:
+    if isinstance(zone_ids, str):
+        zone_ids = [zone_ids]
+        print(zone_ids)
 
-    q = ",".join(["?"] * len(wallet_ids))
+    q = ",".join(["?"] * len(zone_ids))
     rows = await db.fetchall(
-        f"SELECT * FROM diagonalley.zones WHERE wallet IN ({q})", (*wallet_ids,)
+        f"SELECT * FROM diagonalley.zones WHERE id IN ({q})", (*zone_ids,)
     )
 
-    for r in rows:
-        try:
-            x = httpx.get(r["zoneaddress"] + "/" + r["ratingkey"])
-            if x.status_code == 200:
-                await db.execute(
-                    "UPDATE diagonalley.zones SET online = ? WHERE id = ?",
-                    (
-                        True,
-                        r["id"],
-                    ),
-                )
-            else:
-                await db.execute(
-                    "UPDATE diagonalley.zones SET online = ? WHERE id = ?",
-                    (
-                        False,
-                        r["id"],
-                    ),
-                )
-        except:
-            print("An exception occurred")
-    q = ",".join(["?"] * len(wallet_ids))
-    rows = await db.fetchall(
-        f"SELECT * FROM diagonalley.zones WHERE wallet IN ({q})", (*wallet_ids,)
-    )
+    # for r in rows:
+    #     try:
+    #         x = httpx.get(r["zoneaddress"] + "/" + r["ratingkey"])
+    #         if x.status_code == 200:
+    #             await db.execute(
+    #                 "UPDATE diagonalley.zones SET online = ? WHERE id = ?",
+    #                 (
+    #                     True,
+    #                     r["id"],
+    #                 ),
+    #             )
+    #         else:
+    #             await db.execute(
+    #                 "UPDATE diagonalley.zones SET online = ? WHERE id = ?",
+    #                 (
+    #                     False,
+    #                     r["id"],
+    #                 ),
+    #             )
+    #     except:
+    #         print("An exception occurred")
+    # q = ",".join(["?"] * len(wallet_ids))
+    # rows = await db.fetchall(
+    #     f"SELECT * FROM diagonalley.zones WHERE wallet IN ({q})", (*wallet_ids,)
+    # )
     return [Zones(**row) for row in rows]
 
 
@@ -215,6 +214,7 @@ async def create_diagonalley_stall(data: createStalls) -> Stalls:
     )
 
     stall = await get_diagonalley_stall(stall_id)
+    print("STALL", stall)
     assert stall, "Newly created stall couldn't be retrieved"
     return stall
 
@@ -236,26 +236,26 @@ async def get_diagonalley_stall(stall_id: str) -> Optional[Stalls]:
         "SELECT * FROM diagonalley.stalls WHERE id = ?", (stall_id,)
     )
 
-    try:
-        x = httpx.get(roww["stalladdress"] + "/" + roww["ratingkey"])
-        if x.status_code == 200:
-            await db.execute(
-                "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
-                (
-                    True,
-                    stall_id,
-                ),
-            )
-        else:
-            await db.execute(
-                "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
-                (
-                    False,
-                    stall_id,
-                ),
-            )
-    except:
-        print("An exception occurred")
+    # try:
+    #     x = httpx.get(roww["stalladdress"] + "/" + roww["ratingkey"])
+    #     if x.status_code == 200:
+    #         await db.execute(
+    #             "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
+    #             (
+    #                 True,
+    #                 stall_id,
+    #             ),
+    #         )
+    #     else:
+    #         await db.execute(
+    #             "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
+    #             (
+    #                 False,
+    #                 stall_id,
+    #             ),
+    #         )
+    # except:
+    #     print("An exception occurred")
 
     # with open_ext_db("diagonalley") as db:
     row = await db.fetchone(
@@ -273,27 +273,27 @@ async def get_diagonalley_stalls(wallet_ids: Union[str, List[str]]) -> List[Stal
         f"SELECT * FROM diagonalley.stalls WHERE wallet IN ({q})", (*wallet_ids,)
     )
 
-    for r in rows:
-        try:
-            x = httpx.get(r["stalladdress"] + "/" + r["ratingkey"])
-            if x.status_code == 200:
-                await db.execute(
-                    "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
-                    (
-                        True,
-                        r["id"],
-                    ),
-                )
-            else:
-                await db.execute(
-                    "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
-                    (
-                        False,
-                        r["id"],
-                    ),
-                )
-        except:
-            print("An exception occurred")
+    # for r in rows:
+    #     try:
+    #         x = httpx.get(r["stalladdress"] + "/" + r["ratingkey"])
+    #         if x.status_code == 200:
+    #             await db.execute(
+    #                 "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
+    #                 (
+    #                     True,
+    #                     r["id"],
+    #                 ),
+    #             )
+    #         else:
+    #             await db.execute(
+    #                 "UPDATE diagonalley.stalls SET online = ? WHERE id = ?",
+    #                 (
+    #                     False,
+    #                     r["id"],
+    #                 ),
+    #             )
+    #     except:
+    #         print("An exception occurred")
     q = ",".join(["?"] * len(wallet_ids))
     rows = await db.fetchall(
         f"SELECT * FROM diagonalley.stalls WHERE wallet IN ({q})", (*wallet_ids,)

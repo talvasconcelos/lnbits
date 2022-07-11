@@ -151,7 +151,7 @@ async def api_diagonalley_zone_create(
 
         zone = await update_diagonalley_zone(zone_id, **data.dict())
     else:
-        zone = await create_diagonalley_zone(wallet=wallet.wallet.id, data=data)
+        zone = await create_diagonalley_zone(data=data)
 
     return zone.dict()
 
@@ -199,15 +199,14 @@ async def api_diagonalley_stall_create(
         stall = await get_diagonalley_stall(stall_id)
 
         if not stall:
-            return {"message": "Withdraw stall does not exist."}
+            return {"message": "Store does not exist."}
 
         if stall.wallet != wallet.wallet.id:
-            return {"message": "Not your withdraw stall."}
+            return {"message": "Not your store."}
 
         stall = await update_diagonalley_stall(stall_id, **data.dict())
     else:
         stall = await create_diagonalley_stall(data=data)
-
     return stall.dict()
 
 

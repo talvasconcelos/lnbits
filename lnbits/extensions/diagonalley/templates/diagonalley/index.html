@@ -221,7 +221,8 @@
           label="Wallet *"
         >
         </q-select>
-        <div class="row">
+        <!-- NOSTR -->
+        <!-- <div class="row">
           <div class="col-5">
             <q-btn unelevated color="primary">Generate keys</q-btn>
           </div>
@@ -230,6 +231,7 @@
           </div>
         </div>
         <q-input
+      
           v-if="stallDialog.restorekeys"
           filled
           dense
@@ -237,57 +239,63 @@
           label="Public Key"
         ></q-input>
         <q-input
+      
           v-if="stallDialog.restorekeys"
           filled
           dense
           v-model.trim="stallDialog.data.privatekey"
           label="Private Key"
-        ></q-input>
+        ></q-input> -->
+        <!-- END NOSTR -->
         <q-select
-          :options="shippingZoneOptions"
+          :options="zones.map(c => c.id + '-' + c.countries)"
           filled
           dense
           multiple
           v-model.trim="stallDialog.data.shippingzones"
           label="Shipping Zones"
-        ></q-select>
-        <q-select
-          :options="relayOptions"
-          filled
-          dense
-          multiple
-          v-model.trim="stallDialog.data.relays"
-          label="Relays"
-        ></q-select>
-        <q-input
-          filled
-          dense
-          v-model.trim="stallDialog.data.name"
-          label="Custom relays (seperate by comma)"
-        ></q-input>
-        
-        <q-input
-          filled
-          dense
-          v-model.trim="stallDialog.data.nostrShops"
-          label="Stall public keys (seperate by comma)"
-        ></q-input>
+          ></q-select>
+        <!-- NOSTR -->        
+          <!-- <q-select
+            :options="relayOptions"
+            filled
+            dense
+            multiple
+            v-model.trim="stallDialog.data.relays"
+            label="Relays"
+          ></q-select>
+          <q-input
+            filled
+            dense
+            v-model.trim="stallDialog.data.name"
+            label="Custom relays (seperate by comma)"
+          ></q-input>
+          
+          <q-input
+            filled
+            dense
+            v-model.trim="stallDialog.data.nostrShops"
+            label="Stall public keys (seperate by comma)"
+            hint="Nostr support coming soon"
+          ></q-input> -->
+        <!-- END NOSTR -->
+        <p><small>Nostr support coming soon!</small></p>
         <div class="row q-mt-lg">
           <q-btn
             v-if="stallDialog.data.id"
             unelevated
             color="primary"
             type="submit"
-            >Update Stall</q-btn
+            >Update Store</q-btn
           >
           <q-btn
             v-else
             unelevated
             color="primary"
-            :disable="stallDialog.data.countries == null
-              || stallDialog.data.cost == null"
+            :disable="stallDialog.data.name == null
+              || stallDialog.data.wallet == null"
             type="submit"
-            >Create Stall</q-btn
+            >Create Store</q-btn
           >
           <q-btn v-close-popup flat color="grey" class="q-ml-auto"
             >Cancel</q-btn
@@ -317,6 +325,7 @@
       </q-card-section>
     </q-card>
 
+    <!-- ORDERS -->
     <q-card>
       <q-card-section>
         <div class="row items-center no-wrap q-mb-md">
@@ -380,7 +389,7 @@
         </q-table>
       </q-card-section>
     </q-card>
-
+    <!-- PRODUCTS -->
     <q-card>
       <q-card-section>
         <div class="row items-center no-wrap q-mb-md">
@@ -460,7 +469,7 @@
         </q-table>
       </q-card-section>
     </q-card>
-
+    <!-- SHOPS -->
     <q-card>
       <q-card-section>
         <div class="row items-center no-wrap q-mb-md">
@@ -519,7 +528,7 @@
         </q-table>
       </q-card-section>
     </q-card>
-
+    <!-- ZONES -->
     <q-card>
       <q-card-section>
         <div class="row items-center no-wrap q-mb-md">

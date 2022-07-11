@@ -4,6 +4,17 @@ Vue.component(VueQrcode.name, VueQrcode)
 
 const pica = window.pica()
 
+function mapDiagonAlley(obj) {
+  // obj.date = Quasar.utils.date.formatDate(
+  //   new Date(obj.time * 1000),
+  //   'YYYY-MM-DD HH:mm'
+  // )
+  // obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount)
+  // obj.displayUrl = ['/events/', obj.id].join('')
+  // return obj
+  return obj
+}
+
 new Vue({
   el: '#vue',
   mixins: [windowMixin],
@@ -15,12 +26,14 @@ new Vue({
       zones: [],
       shippedModel: false,
       shippingZoneOptions: [
+        'Wordlwide',
         'Australia',
         'Austria',
         'Belgium',
         'Brazil',
         'Canada',
         'Denmark',
+        'Europe',
         'Finland',
         'France*',
         'Germany',
@@ -252,10 +265,11 @@ new Vue({
       LNbits.api
         .request(
           'GET',
-          '/diagonalley/api/v1/stalls?all_wallets',
+          '/diagonalley/api/v1/stalls?all_wallets=true',
           this.g.user.wallets[0].inkey
         )
         .then(function (response) {
+          console.log(response.data)
           self.stalls = response.data.map(function (obj) {
             console.log(obj)
             return mapDiagonAlley(obj)
@@ -270,19 +284,21 @@ new Vue({
       this.stallDialog.show = true
     },
     sendStallFormData: function () {
-      if (this.stallDialog.data.id) {
-      } else {
-        var data = {
-          name: this.stallDialog.data.name,
-          wallet: this.stallDialog.data.wallet,
-          publickey: this.stallDialog.data.publickey,
-          privatekey: this.stallDialog.data.privatekey,
-          relays: this.stallDialog.data.relays
-        }
-      }
+      let data = this.stallDialog.data
+      data.shippingzones = this.stallDialog.data.shippingzones
+        .map(z => z.split('-')[0])
+        .toString()
+      // var data = {
+      //   name: this.stallDialog.data.name,
+      //   wallet: this.stallDialog.data.wallet,
+      //   shippingzones: this
+      //   publickey: this.stallDialog.data.publickey,
+      //   privatekey: this.stallDialog.data.privatekey,
+      //   relays: this.stallDialog.data.relays
+      // }
 
       if (this.stallDialog.data.id) {
-        this.updateStall(this.stallDialog.data)
+        this.updateStall(data)
       } else {
         this.createStall(data)
       }
@@ -313,16 +329,14 @@ new Vue({
     },
     createStall: function (data) {
       var self = this
+      var wallet = _.findWhere(self.g.user.wallets, {
+        id: self.stallDialog.data.wallet
+      })
+      console.log(data)
       LNbits.api
-        .request(
-          'POST',
-          '/diagonalley/api/v1/stalls',
-          _.findWhere(self.g.user.wallets, {
-            id: self.stallDialog.data.wallet
-          }).inkey,
-          data
-        )
+        .request('POST', '/diagonalley/api/v1/stalls', wallet.inkey, data)
         .then(function (response) {
+          console.log(response)
           self.stalls.push(mapDiagonAlley(response.data))
           self.stallDialog.show = false
           self.stallDialog.data = {}
@@ -513,10 +527,11 @@ new Vue({
       LNbits.api
         .request(
           'GET',
-          '/diagonalley/api/v1/zones?all_wallets',
+          '/diagonalley/api/v1/zones?all_wallets=true',
           this.g.user.wallets[0].inkey
         )
         .then(function (response) {
+          console.log(response)
           self.zones = response.data.map(function (obj) {
             return mapDiagonAlley(obj)
           })
@@ -533,7 +548,7 @@ new Vue({
       if (this.zoneDialog.data.id) {
       } else {
         var data = {
-          countries: toString(this.zoneDialog.data.countries),
+          countries: this.zoneDialog.data.countries.toString(),
           cost: parseInt(this.zoneDialog.data.cost)
         }
       }
